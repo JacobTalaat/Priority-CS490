@@ -5,7 +5,7 @@ Priority tracker built with Next.js, Prisma, and PostgreSQL.
 ## Prerequisites
 
 - Node.js LTS
-- Docker (with Compose)
+- PostgreSQL 16 installed on your machine
 
 ## Setup
 
@@ -15,11 +15,29 @@ Priority tracker built with Next.js, Prisma, and PostgreSQL.
    cp .env.example .env
    ```
 
-2. Start the PostgreSQL database:
+2. Create the database user and database (only the first time):
+
+   On macOS, install and start PostgreSQL with Homebrew if you don't have it yet:
 
    ```bash
-   docker compose up -d db
+   brew install postgresql@16
+   brew services start postgresql@16
    ```
+
+   On Ubuntu:
+
+   ```bash
+   sudo apt install -y postgresql
+   ```
+
+   Then create the user and database that match `.env.example`:
+
+   ```bash
+   psql postgres -c "CREATE USER priority WITH PASSWORD 'priority' CREATEDB;"
+   psql postgres -c "CREATE DATABASE priority OWNER priority;"
+   ```
+
+   On Ubuntu, run those two commands with `sudo -u postgres` in front.
 
 3. Install dependencies (this also generates the Prisma client):
 
