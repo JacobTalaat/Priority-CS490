@@ -45,4 +45,145 @@ curl http://localhost:3000/api/health
 
 ---
 
+### `POST /api/auth/signup`
+
+Creates a student account, then creates a session token for that account.
+
+- **Method**: `POST`
+- **Path**: `/api/auth/signup`
+
+**Request**
+
+JSON body with:
+
+- `email` (string)
+- `password` (string, minimum 8 characters)
+
+```bash
+curl -i -X POST http://localhost:3000/api/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{"email":"student@example.com","password":"correct-horse"}'
+```
+
+**Response**
+
+`201` — account and session created:
+
+```json
+{
+  "token": "opaque-bearer-token",
+  "user": {
+    "id": 1,
+    "email": "student@example.com"
+  }
+}
+```
+
+`400` — malformed body, invalid email, or password shorter than 8 characters:
+
+```json
+{
+  "error": "Invalid body"
+}
+```
+
+`409` — email already registered:
+
+```json
+{
+  "error": "Email already registered"
+}
+```
+
+---
+
+### `POST /api/auth/login`
+
+Authenticates an existing account and returns a new session token.
+
+- **Method**: `POST`
+- **Path**: `/api/auth/login`
+
+**Request**
+
+JSON body with:
+
+- `email` (string)
+- `password` (string, minimum 8 characters)
+
+```bash
+curl -i -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"student@example.com","password":"correct-horse"}'
+```
+
+**Response**
+
+`200` — credentials valid:
+
+```json
+{
+  "token": "opaque-bearer-token",
+  "user": {
+    "id": 1,
+    "email": "student@example.com"
+  }
+}
+```
+
+`400` — malformed body, invalid email, or password shorter than 8 characters:
+
+```json
+{
+  "error": "Invalid body"
+}
+```
+
+`401` — email/password pair is not valid:
+
+```json
+{
+  "error": "Invalid email or password"
+}
+```
+
+---
+
+### `GET /api/auth/me`
+
+Returns the currently authenticated user from the bearer token in `Authorization`.
+
+- **Method**: `GET`
+- **Path**: `/api/auth/me`
+
+**Request**
+
+No body. Send an `Authorization` header with the bearer token from sign up or log in.
+
+```bash
+curl -i http://localhost:3000/api/auth/me \
+  -H "Authorization: ******"
+```
+
+**Response**
+
+`200` — token valid and session active:
+
+```json
+{
+  "id": 1,
+  "email": "student@example.com"
+}
+```
+
+`401` — token missing, malformed, invalid, or expired:
+
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+---
+
 When you add a route, copy the section above and fill in the new route: keep the section heading in the same `METHOD /path` backticked form, and give it a **Method** line, a **Path** line, a **Request** part, and a **Response** part with a JSON example for every status code it returns.
