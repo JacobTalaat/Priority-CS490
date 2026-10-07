@@ -72,6 +72,7 @@ curl -i -X POST http://localhost:3000/api/auth/signup \
 ```json
 {
   "token": "opaque-bearer-token",
+  "expiresAt": "2026-11-06T18:00:00.000Z",
   "user": {
     "id": 1,
     "email": "student@example.com"
@@ -124,6 +125,7 @@ curl -i -X POST http://localhost:3000/api/auth/login \
 ```json
 {
   "token": "opaque-bearer-token",
+  "expiresAt": "2026-11-06T18:00:00.000Z",
   "user": {
     "id": 1,
     "email": "student@example.com"
@@ -144,6 +146,47 @@ curl -i -X POST http://localhost:3000/api/auth/login \
 ```json
 {
   "error": "Invalid email or password"
+}
+```
+
+---
+
+### `POST /api/auth/refresh`
+
+Rotates the current session: deletes the row for the presented token and creates a fresh session with a new token and expiry.
+
+- **Method**: `POST`
+- **Path**: `/api/auth/refresh`
+
+**Request**
+
+No body. Send an `Authorization` header with the bearer token from sign up, log in, or a previous refresh. The presented token is invalidated by the response.
+
+```bash
+curl -i -X POST http://localhost:3000/api/auth/refresh \
+  -H "Authorization: ******"
+```
+
+**Response**
+
+`200` — session rotated:
+
+```json
+{
+  "token": "new-opaque-bearer-token",
+  "expiresAt": "2026-11-06T18:00:00.000Z",
+  "user": {
+    "id": 1,
+    "email": "student@example.com"
+  }
+}
+```
+
+`401` — token missing, malformed, invalid, or expired:
+
+```json
+{
+  "error": "Unauthorized"
 }
 ```
 
