@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { signUp, validateSignUp } from "./auth-client";
+import { WRONG_CREDENTIALS, logIn, signUp, validateLogIn, validateSignUp } from "./auth-client";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -78,5 +78,64 @@ describe("signUp", () => {
 
     expect(result.ok).toBe(false);
     expect(!result.ok && result.formError).toMatch(/Can't reach Priority/);
+  });
+});
+
+describe("validateLogIn", () => {
+  it("accepts any filled in email and password", () => {
+    expect(validateLogIn({ email: "student@njit.edu", password: "x" })).toEqual({});
+  });
+
+  it("asks for both fields when they are blank", () => {
+    expect(validateLogIn({ email: " ", password: "" })).toEqual({
+      email: "Enter your email.",
+      password: "Enter your password.",
+    });
+  });
+});
+
+describe("logIn", () => {
+  it("returns the token and user on success", async () => {
+    const fetchMock = vi.fn(async () =>
+      Response.json({ token: "tok", user: { id: "u1", email: "student@njit.edu" } }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await logIn({ email: "student@njit.edu ", password: "12345678" });
+
+    expect(result).toEqual({ ok: true, token: "tok", user: { id: "u1", email: "student@njit.edu" } });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/auth/login",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ email: "student@njit.edu", password: "12345678" }),
+      }),
+    );
+  });
+
+  it("shows a clear wrong password error on 401", async () => {
+    vi.stubGlobal("fetch", async () => Response.json({ error: "Invalid email or password" }, { status: 401 }));
+
+    expect(await logIn({ email: "student@njit.edu", password: "wrong-password" })).toEqual({
+      ok: false,
+      fieldErrors: {},
+      formError: WRONG_CREDENTIALS,
+    });
+  });
+
+  it("treats a 400 (password too short to be real) as a wrong password", async () => {
+    vi.stubGlobal("fetch", async () => Response.json({ error: "Invalid body" }, { status: 400 }));
+
+    const result = await logIn({ email: "student@njit.edu", password: "short" });
+
+    expect(!result.ok && result.formError).toBe(WRONG_CREDENTIALS);
+  });
+
+  it("passes through server errors", async () => {
+    vi.stubGlobal("fetch", async () => Response.json({ error: "Database unavailable" }, { status: 503 }));
+
+    const result = await logIn({ email: "student@njit.edu", password: "12345678" });
+
+    expect(!result.ok && result.formError).toBe("Database unavailable");
   });
 });

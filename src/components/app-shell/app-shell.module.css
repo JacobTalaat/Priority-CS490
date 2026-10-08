@@ -6,15 +6,17 @@
 }
 
 .topbar {
-  display: flex;
+  display: grid;
   min-height: 72px;
+  grid-template-areas: "brand tabs account";
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  justify-content: space-between;
   gap: 24px;
   border-bottom: 1px solid var(--divider);
 }
 
 .wordmark {
+  grid-area: brand;
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
@@ -38,7 +40,13 @@
 }
 
 .tabs {
+  grid-area: tabs;
   align-self: stretch;
+  justify-self: end;
+}
+
+.account {
+  grid-area: account;
 }
 
 .tabList {
@@ -88,10 +96,16 @@
 
 @media (max-width: 720px) {
   .topbar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-    padding-top: 16px;
+    grid-template-areas:
+      "brand account"
+      "tabs tabs";
+    grid-template-columns: 1fr auto;
+    gap: 8px 0;
+    padding-top: 12px;
+  }
+
+  .tabs {
+    justify-self: stretch;
   }
 
   .tabList {
