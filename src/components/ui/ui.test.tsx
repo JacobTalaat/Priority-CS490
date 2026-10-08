@@ -53,11 +53,13 @@ describe("Input", () => {
     expect(html).not.toContain("aria-invalid");
   });
 
-  it("lists the error before the hint when both are shown", () => {
+  it("shows the error in place of the hint", () => {
     const html = renderToStaticMarkup(
       <Input id="password" label="Password" hint="8 or more characters" error="Too short" />,
     );
-    expect(html).toContain('aria-describedby="password-error password-hint"');
+    expect(html).toContain('aria-describedby="password-error"');
+    expect(html).toContain("Too short");
+    expect(html).not.toContain("8 or more characters");
   });
 });
 
