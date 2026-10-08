@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
+import { PageHeader } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Weights" };
 
 export default function WeightsPage() {
   return (
-    <section>
-      <p className="eyebrow">Grade weights</p>
-      <h1 className="page-title">Weights</h1>
-      <p className="page-note">Category weights for each class will show up here.</p>
-    </section>
+    <PageHeader
+      eyebrow="Grade weights"
+      title="Weights"
+      description="Category weights for each class will show up here."
+    />
   );
 }
