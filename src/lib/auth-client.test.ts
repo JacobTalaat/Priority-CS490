@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { WRONG_CREDENTIALS, logIn, signUp, validateLogIn, validateSignUp } from "./auth-client";
+import { WRONG_CREDENTIALS, checkSession, logIn, signUp, validateLogIn, validateSignUp } from "./auth-client";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -137,5 +137,38 @@ describe("logIn", () => {
     const result = await logIn({ email: "student@njit.edu", password: "12345678" });
 
     expect(!result.ok && result.formError).toBe("Database unavailable");
+  });
+});
+
+describe("checkSession", () => {
+  it("returns the user for a valid token", async () => {
+    const fetchMock = vi.fn(async () => Response.json({ id: "u1", email: "student@njit.edu" }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    expect(await checkSession("tok")).toEqual({
+      status: "valid",
+      user: { id: "u1", email: "student@njit.edu" },
+    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/auth/me",
+      expect.objectContaining({ headers: { Authorization: "Bearer tok" } }),
+    );
+  });
+
+  it("reports an expired or unknown token as invalid", async () => {
+    vi.stubGlobal("fetch", async () => Response.json({ error: "Unauthorized" }, { status: 401 }));
+    expect(await checkSession("tok")).toEqual({ status: "invalid" });
+  });
+
+  it("does not treat a network failure as logged out", async () => {
+    vi.stubGlobal("fetch", async () => {
+      throw new TypeError("Failed to fetch");
+    });
+    expect(await checkSession("tok")).toEqual({ status: "offline" });
+  });
+
+  it("does not treat a server error as logged out", async () => {
+    vi.stubGlobal("fetch", async () => Response.json({ status: "error" }, { status: 503 }));
+    expect(await checkSession("tok")).toEqual({ status: "offline" });
   });
 });
