@@ -133,6 +133,12 @@
   }
 }
 
+@media (max-width: 360px) {
+  .tab {
+    font-size: 13px;
+  }
+}
+
 .checking {
   display: grid;
   min-height: 100vh;
