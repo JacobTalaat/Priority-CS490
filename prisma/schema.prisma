@@ -25,6 +25,7 @@ model User {
   canvasTokenTag    String?
   canvasBaseUrl     String?
   canvasCheckedAt   DateTime?
+  lastSyncedAt      DateTime?
   sessions          Session[]
   courses           Course[]
 }
