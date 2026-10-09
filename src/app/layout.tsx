@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Archivo } from "next/font/google";
 import type { ReactNode } from "react";
 import "./globals.css";
@@ -15,6 +15,13 @@ export const metadata: Metadata = {
     template: "%s · Priority",
   },
   description: "Priority tracker",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  // Matches --background so the phone's browser bar blends into the page.
+  themeColor: "#08090a",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
