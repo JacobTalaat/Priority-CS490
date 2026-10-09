@@ -7,6 +7,7 @@
   --muted: #7c8385;
   --accent: #7fb2a4;
   --divider: rgba(233, 236, 236, 0.1);
+  --danger: #e08a7e;
   --radius: 3px;
   --page-gutter: 48px;
 }
@@ -20,6 +21,7 @@ html[data-theme="light"] {
   --muted: #6a7072;
   --accent: #2f6f60;
   --divider: rgba(20, 22, 24, 0.1);
+  --danger: #a8382b;
 }
 
 * {
@@ -78,16 +80,3 @@ a {
   }
 }
 
-.page-title {
-  margin-top: 12px;
-  font-size: clamp(36px, 5vw, 56px);
-  font-weight: 800;
-  letter-spacing: -0.05em;
-  line-height: 1;
-}
-
-.page-note {
-  max-width: 480px;
-  margin-top: 16px;
-  color: var(--secondary);
-}
