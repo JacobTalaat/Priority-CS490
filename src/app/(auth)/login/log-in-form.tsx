@@ -10,7 +10,7 @@ import type { Credentials, FieldErrors } from "@/lib/auth-client";
 import { setToken } from "@/lib/session";
 import styles from "../auth.module.css";
 
-export function LogInForm() {
+export function LogInForm({ next }: { next: string }) {
   const router = useRouter();
   const [values, setValues] = useState<Credentials>({ email: "", password: "" });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -42,7 +42,7 @@ export function LogInForm() {
       return;
     }
     setToken(result.token);
-    router.replace("/today");
+    router.replace(next);
   }
 
   return (

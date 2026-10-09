@@ -87,3 +87,18 @@ export async function logIn({ email, password }: Credentials): Promise<AuthResul
   }
   return { ok: false, fieldErrors: {}, formError: result.error };
 }
+
+export type SessionCheck = { status: "valid"; user: AuthUser } | { status: "invalid" } | { status: "offline" };
+
+// 401 means the token is gone or expired. A network failure doesn't prove that, so the
+// caller can keep the student on the page instead of logging them out.
+export async function checkSession(token: string): Promise<SessionCheck> {
+  const result = await apiRequest<AuthUser>("/api/auth/me", { token });
+  if (result.ok) {
+    return { status: "valid", user: result.data };
+  }
+  if (result.status === 401) {
+    return { status: "invalid" };
+  }
+  return { status: "offline" };
+}
