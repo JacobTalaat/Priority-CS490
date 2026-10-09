@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { Button, Input, Notice } from "@/components/ui";
-import { MIN_PASSWORD_LENGTH, signUp, validateSignUp } from "@/lib/auth-client";
+import { logIn, validateLogIn } from "@/lib/auth-client";
 import type { Credentials, FieldErrors } from "@/lib/auth-client";
 import { setToken } from "@/lib/session";
 import styles from "../auth.module.css";
 
-export function SignUpForm() {
+export function LogInForm({ next }: { next: string }) {
   const router = useRouter();
   const [values, setValues] = useState<Credentials>({ email: "", password: "" });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -26,22 +26,23 @@ export function SignUpForm() {
     event.preventDefault();
     setFormError(null);
 
-    const errors = validateSignUp(values);
+    const errors = validateLogIn(values);
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       return;
     }
 
     setSubmitting(true);
-    const result = await signUp(values);
+    const result = await logIn(values);
     if (!result.ok) {
       setFieldErrors(result.fieldErrors);
       setFormError(result.formError ?? null);
+      setValues((current) => ({ ...current, password: "" }));
       setSubmitting(false);
       return;
     }
     setToken(result.token);
-    router.replace("/classes");
+    router.replace(next);
   }
 
   return (
@@ -62,18 +63,17 @@ export function SignUpForm() {
           label="Password"
           name="password"
           type="password"
-          autoComplete="new-password"
+          autoComplete="current-password"
           value={values.password}
           onChange={(event) => update("password", event.target.value)}
-          hint={`At least ${MIN_PASSWORD_LENGTH} characters.`}
           error={fieldErrors.password}
         />
         <Button type="submit" fullWidth loading={submitting}>
-          {submitting ? "Creating account…" : "Create account"}
+          {submitting ? "Logging in…" : "Log in"}
         </Button>
       </form>
       <p className={styles.switch}>
-        Already have an account? <Link href="/login">Log in</Link>
+        New to Priority? <Link href="/signup">Create an account</Link>
       </p>
     </>
   );

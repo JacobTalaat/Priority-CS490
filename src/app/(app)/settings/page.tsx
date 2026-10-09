@@ -10,7 +10,7 @@ export default function SettingsPage() {
       <List label="Settings sections">
         <ListRow title="Canvas" meta="Connect your Canvas account to import classes" trailing="Soon" />
         <ListRow title="Calendar feed" meta="A backup way to load assignments" trailing="Soon" />
-        <ListRow title="Account" meta="Your email and log out" trailing="Soon" />
+        <ListRow title="Account" meta="Your email and password" trailing="Soon" />
       </List>
     </>
   );

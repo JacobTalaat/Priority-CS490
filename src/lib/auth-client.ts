@@ -58,3 +58,47 @@ export async function signUp({ email, password }: Credentials): Promise<AuthResu
   }
   return { ok: false, fieldErrors: {}, formError: result.error };
 }
+
+export function validateLogIn({ email, password }: Credentials): FieldErrors {
+  const errors: FieldErrors = {};
+  if (!email.trim()) {
+    errors.email = "Enter your email.";
+  }
+  if (!password) {
+    errors.password = "Enter your password.";
+  }
+  return errors;
+}
+
+export const WRONG_CREDENTIALS = "Wrong email or password. Check them and try again.";
+
+export async function logIn({ email, password }: Credentials): Promise<AuthResult> {
+  const result = await apiRequest<AuthResponse>("/api/auth/login", {
+    method: "POST",
+    body: { email: email.trim(), password },
+  });
+  if (result.ok) {
+    return { ok: true, token: result.data.token, user: result.data.user };
+  }
+  // The API answers 400 for a malformed email or a password under 8 characters. Neither can
+  // belong to a real account, so treat it the same as a wrong password.
+  if (result.status === 401 || result.status === 400) {
+    return { ok: false, fieldErrors: {}, formError: WRONG_CREDENTIALS };
+  }
+  return { ok: false, fieldErrors: {}, formError: result.error };
+}
+
+export type SessionCheck = { status: "valid"; user: AuthUser } | { status: "invalid" } | { status: "offline" };
+
+// 401 means the token is gone or expired. A network failure doesn't prove that, so the
+// caller can keep the student on the page instead of logging them out.
+export async function checkSession(token: string): Promise<SessionCheck> {
+  const result = await apiRequest<AuthUser>("/api/auth/me", { token });
+  if (result.ok) {
+    return { status: "valid", user: result.data };
+  }
+  if (result.status === 401) {
+    return { status: "invalid" };
+  }
+  return { status: "offline" };
+}
