@@ -229,4 +229,211 @@ curl -i http://localhost:3000/api/auth/me \
 
 ---
 
+### `POST /api/canvas/token`
+
+Saves the student's Canvas personal access token. The token is checked against Canvas first and only stored if Canvas accepts it. It is encrypted before it is written and is never returned by any route.
+
+- **Method**: `POST`
+- **Path**: `/api/canvas/token`
+
+**Request**
+
+JSON body with:
+
+- `token` (string) — a Canvas personal access token
+- `baseUrl` (string, optional) — the Canvas origin, for example `https://njit.instructure.com`. Defaults to `CANVAS_BASE_URL`. Must be `https` with no path.
+
+```bash
+curl -i -X POST http://localhost:3000/api/canvas/token \
+  -H "Authorization: ******" \
+  -H "Content-Type: application/json" \
+  -d '{"token":"******","baseUrl":"https://njit.instructure.com"}'
+```
+
+**Response**
+
+`200` — Canvas accepted the token and it was stored:
+
+```json
+{
+  "connected": true,
+  "canvasUser": {
+    "id": 69783,
+    "name": "Jacob Moawad"
+  }
+}
+```
+
+`400` — the body was invalid, the Canvas URL was not a valid `https` origin, or Canvas rejected the token:
+
+```json
+{
+  "error": "Canvas rejected this token"
+}
+```
+
+`401` — no valid app session:
+
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+`502` — Canvas could not be reached:
+
+```json
+{
+  "error": "Could not reach Canvas"
+}
+```
+
+---
+
+### `GET /api/canvas/token`
+
+Reports whether the student has connected Canvas. Never returns the token itself.
+
+- **Method**: `GET`
+- **Path**: `/api/canvas/token`
+
+**Request**
+
+No body.
+
+```bash
+curl -i http://localhost:3000/api/canvas/token \
+  -H "Authorization: ******"
+```
+
+**Response**
+
+`200` — current connection state:
+
+```json
+{
+  "connected": true,
+  "baseUrl": "https://njit.instructure.com",
+  "checkedAt": "2026-10-07T18:30:00.000Z"
+}
+```
+
+`401` — no valid app session:
+
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+---
+
+### `DELETE /api/canvas/token`
+
+Disconnects Canvas by clearing the stored credentials.
+
+- **Method**: `DELETE`
+- **Path**: `/api/canvas/token`
+
+**Request**
+
+No body.
+
+```bash
+curl -i -X DELETE http://localhost:3000/api/canvas/token \
+  -H "Authorization: ******"
+```
+
+**Response**
+
+`200` — credentials cleared:
+
+```json
+{
+  "connected": false
+}
+```
+
+`401` — no valid app session:
+
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+---
+
+### `POST /api/canvas/token/test`
+
+Re-checks the stored Canvas token against Canvas. On success the stored "last checked" time is updated. A rejected token is reported but left in place, so the student can replace it rather than silently losing the connection.
+
+- **Method**: `POST`
+- **Path**: `/api/canvas/token/test`
+
+**Request**
+
+No body.
+
+```bash
+curl -i -X POST http://localhost:3000/api/canvas/token/test \
+  -H "Authorization: ******"
+```
+
+**Response**
+
+`200` — Canvas still accepts the stored token:
+
+```json
+{
+  "ok": true,
+  "canvasUser": {
+    "id": 69783,
+    "name": "Jacob Moawad"
+  }
+}
+```
+
+`400` — Canvas rejected the stored token:
+
+```json
+{
+  "error": "Canvas rejected this token"
+}
+```
+
+`401` — no valid app session:
+
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+`409` — the student has not connected Canvas:
+
+```json
+{
+  "error": "Canvas not connected"
+}
+```
+
+`502` — Canvas could not be reached:
+
+```json
+{
+  "error": "Could not reach Canvas"
+}
+```
+
+`500` — the check failed for a reason that is not Canvas, for example the database was unreachable:
+
+```json
+{
+  "error": "Token check failed"
+}
+```
+
+---
+
 When you add a route, copy the section above and fill in the new route: keep the section heading in the same `METHOD /path` backticked form, and give it a **Method** line, a **Path** line, a **Request** part, and a **Response** part with a JSON example for every status code it returns.

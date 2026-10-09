@@ -20,8 +20,13 @@ model User {
   passwordHash String
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
-  sessions     Session[]
-  courses      Course[]
+  canvasTokenCipher String?
+  canvasTokenIv     String?
+  canvasTokenTag    String?
+  canvasBaseUrl     String?
+  canvasCheckedAt   DateTime?
+  sessions          Session[]
+  courses           Course[]
 }
 
 model Session {
